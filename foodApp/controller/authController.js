@@ -105,6 +105,10 @@ module.exports.protectRoute = async function protectRoute(req, res, next) {
             }
 
         } else {
+            const client =req.get('User-Agent');
+            if(client.includes("Mozilla") || client.includes("Chrome")  ){
+                return redirect('/login');
+            }// for browser clients 
             return res.json({ 'messgae': 'login again ' })
         }
     } catch (err) {
@@ -113,18 +117,24 @@ module.exports.protectRoute = async function protectRoute(req, res, next) {
 }
 
 // foget p/w
-model.exports.forgetpassword=async function forgetpassword(req, res) {
+module.exports.forgetpassword = async function forgetpassword(req, res,next) {
     let { email } = req.body;
     try {
         const user = await userModel.findOne({ email: email });
         // gen link <-- need token for tis 
         // mail reset link
         if (user) {
-            const resetToken = user.createResetToken();
-            //http://abc.com/reserpassword/resetToekn
+            const resetToken = user.createResetToken();// a new resetToekn is created for te user 
+            //http://abc.com/resetpassword/resetToekn
             let resetPasswordLink = `${req.protocol}://${req.get('host')}/resetpassword/${resetToken}`;
+            console.log('reset pw link',resetPasswordLink);
+           return res.json({
+            'reset pw link':resetPasswordLink
+
+           })
             //send email to user-->nodemailer
         } else {
+           
             return res.json({ message: 'user not found , pls sign up ' });
         }
 
@@ -138,25 +148,32 @@ model.exports.forgetpassword=async function forgetpassword(req, res) {
 
 }
 
-module.exports.resetpassword=async function resetpassword(req,res){
-    const token=req.params.token;
-    let{password,confirmpassword}=req.body;
-    const user=await userModel.findOne({resetToken:token});
+module.exports.resetpassword = async function resetpassword(req, res) {
+    const token = req.params.token; // te route ws resetpassword/:token
+    console.log('token',token);
+    let { password, confirmpassword } = req.body;
+    const user = await userModel.findOne({ resetToken: token });// find te user having this value of reset token 
+    console.log(user);
     // reset p/w handler fun will update usr p/w in db
-    if(user){ 
-    user.resetPasswordHandler(password,confirmpassword);
-     await user.save();
-     res.json({
-         message:'user password changed succesfuly '
-     });
-    }else{
+    if (user) {
+        user.resetPasswordHandler(password, confirmpassword);
+       await user.save();
         res.json({
-            message:'user not found  '
+            message: 'user password changed succesfuly '
+        });
+    } else {
+        res.json({
+            message: 'user not found  '
         });
 
     }
-     
+
+}
 
 
-
+module.exports.logout=function logout(req, res) {
+    res.cookie('login', '', { maxAge: 1 }); // make login cookie value emoty and detsroy it itself after 1ms
+    res.json({
+        message:'user logged out successfully'
+    });
 }

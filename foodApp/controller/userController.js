@@ -1,5 +1,6 @@
 const res = require('express/lib/response');
 let userModel=require('../models/userModel');
+const crypto=require('crypto');
 
 // users route functions
 module.exports.getAllUser=async function getAllUsers(req,res){

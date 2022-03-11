@@ -50,7 +50,9 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:'../Images/UserIcon.png'
       },
-      resetToken:String
+      resetToken:{
+          type:String
+      }
 });
 userSchema.pre('save',function(){
     this.confirmPassword=undefined;
@@ -59,7 +61,9 @@ userSchema.pre('save',function(){
 userSchema.methods.createResetToken=function(){
    // creating unique token using npm i crypto
   const resetToken=crypto.randomBytes(32).toString("hex");
-   this.resetToken=resetToken;// schema reset token is assigned te tokn we created now 
+   this.resetToken=resetToken;// schema reset token is assigned te tokn we created now
+   console.log(this);
+   console.log('this reset token ',this.resetToken); 
    return resetToken;
 }
 
@@ -68,6 +72,8 @@ userSchema.methods.resetPasswordHandler=function(password,confirmPassword){
     this.password=password;
     }
     this.resetToken=undefined;// this work over
+    console.log('user method exe ');
+
 }
 // hooks
 /*for now not using this 

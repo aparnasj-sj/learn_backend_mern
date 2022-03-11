@@ -4,7 +4,7 @@ let userModel=require('../models/userModel');
 let  cookieParser = require('cookie-parser'); 
 
 const {getUser,getAllUser,updateUser,deleteUser}=require('../controller/userController');
-const {signup,login,isAuthorised,protectRoute}=require('../controller/authController');
+const {signup,login,isAuthorised,protectRoute,resetpassword,forgetpassword,logout}=require('../controller/authController');
 //user s options
 userRouter.route('/:id')// url parameter user specific 
 .patch(updateUser)
@@ -22,9 +22,12 @@ userRouter
 .post(forgetpassword);
 
 userRouter
-.route('/resetpassword/:token')
+.route('/resetpassword/:token') // this token is unqiue for this link
 .post(resetpassword);
 
+userRouter
+.route('/logout')
+.get(logout);
 //profile pg 
 userRouter.use(protectRoute);// protect route for chccek if login n all using jwt 
 userRouter
