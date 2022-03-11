@@ -1,57 +1,53 @@
 const express = require('express');
-const userRouter = express.Router()
+const userRouter = express.Router();//mini app
+let userModel=require('../models/userModel');
+let  cookieParser = require('cookie-parser'); 
 
-userRouter.route('/')
-.get(getUsers)
-.post(postUsers)
-.patch(updateUsers)
-.delete(deleteUsers);
+const {getUser,getAllUser,updateUser,deleteUser}=require('../controller/userController');
+const {signup,login,isAuthorised,protectRoute}=require('../controller/authController');
+//user s options
+userRouter.route('/:id')// url parameter user specific 
+.patch(updateUser)
+.delete(deleteUser);
+
+userRouter.route('/signup')
+.post(signup);
+
+userRouter.route('/login')
+.post(login);
+
+// forgt,reset pw
+userRouter
+.route('/forgetpassword')
+.post(forgetpassword);
+
+userRouter
+.route('/resetpassword/:token')
+.post(resetpassword);
+
+//profile pg 
+userRouter.use(protectRoute);// protect route for chccek if login n all using jwt 
+userRouter
+.route('/userProfile')
+.get(getUser)
+
+// admin speific fun s
+userRouter.use(isAuthorised(['admin']));
+userRouter
+.route('/')
+.get(getAllUser)// this is admin  only
+
+
 
 /// cookie router
+/*
 userRouter.route('/getCookies')
 .get(getCookies);
 userRouter.route('/setCookies')
 .get(setCookies);
 
 
-// users route functions
-async function getUsers(req,res){
-    // from DB
-    let allUsers=await userModel.find({});
-    res.json({'message':'users',data:allUsers});
-}
-async function postUsers(req,res){
-    // from DB
-   // let allUsers=await userModel.find();
-   // res.json({'message':'users',data:allUsers});
-}
-async function updateUsers(req,res){
-    let dataToBeUpdated=req.body;
-    let user=await userModel.findOneAndUpdate({email:"abc@gmail.com"}, dataToBeUpdated,{new: true})
-    console.log(dataToBeUpdated,user);
-    res.json({'meassde':'updated user',data:user});
-}
-async function deleteUsers(req,res){
-    let dataToBeDeleted=req.body;
-    let user=await userModel.findOneAndDelete(dataToBeDeleted)
-    console.log(dataToBeDeleted,user);
-    res.json({'meassde':'updated user',data:user});
-}
 
-
-function getCookies(req,res){
-
-}
-function setCookies(req,res){
-  //  res.setHeader('Set-Cookie','isLoggedin=true');
-  //  res.send('cookie is set ');
-  res.cookie('isLoggedIn',false);
-  // if another cookie of same name exists value is replaced 
-  res.send('cookie set');
-
-
-
-}
-
+*/
 
 module.exports=userRouter;
