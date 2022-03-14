@@ -3,7 +3,7 @@ const express = require('express');
 let userModel = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const JWT_KEY = require('../secrets').JWT_KEY;
-
+const {sendMail} =require('../utility/nodemailer');
 
 async function getSignUp(req, res) {
     console.log('here');
@@ -15,6 +15,7 @@ module.exports.signup = async function postSignUp(req, res) {
         let dataObj = req.body;
         console.log(dataObj);
         let user = await userModel.create(dataObj);
+        sendMail("signup",user);// nodemailer
         if (!user) { return res.json({ 'message': 'error in user sign up' }); }
 
         res.json({ 'meaasge': 'user signed up', data: user });
@@ -42,7 +43,7 @@ module.exports.login = async function loginUser(req, res) {
                     res.cookie('login', token, { httpOnly: true });
                     return res.json({
                         message: 'user log in sucess  ',
-                        userDetails: data
+                        data: user
                     });
 
                 } else {
@@ -128,6 +129,14 @@ module.exports.forgetpassword = async function forgetpassword(req, res,next) {
             //http://abc.com/resetpassword/resetToekn
             let resetPasswordLink = `${req.protocol}://${req.get('host')}/resetpassword/${resetToken}`;
             console.log('reset pw link',resetPasswordLink);
+
+            //mail 
+            let obj={
+                resetPasswordLink:resetPasswordLink,
+                email:email
+            }
+            sendMail("resetpassword",obj);
+            
            return res.json({
             'reset pw link':resetPasswordLink
 
@@ -153,7 +162,7 @@ module.exports.resetpassword = async function resetpassword(req, res) {
     console.log('token',token);
     let { password, confirmpassword } = req.body;
     const user = await userModel.findOne({ resetToken: token });// find te user having this value of reset token 
-    console.log(user);
+   // console.log(user);
     // reset p/w handler fun will update usr p/w in db
     if (user) {
         user.resetPasswordHandler(password, confirmpassword);

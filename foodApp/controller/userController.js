@@ -65,3 +65,13 @@ function setCookies(req,res){
 
 
 }*/
+
+module.exports.updateProfileImage=async function(req,res){
+   // let user_id=req.id;
+   // let user= await userModel.findById(user_id);
+  //  user.profileImage=req.imageLocation;
+  //  await user.save();
+    res.json({
+        message:"file uploaded successfuly"
+    })
+}
